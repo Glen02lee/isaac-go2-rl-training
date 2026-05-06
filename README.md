@@ -52,7 +52,17 @@ Once optimization is complete, the updated weights are saved as a PyTorch file (
 
 ---
 
-## 📂 Repository Structure (Locomotion Focus)
-* `scripts/reinforcement_learning/skrl/train.py` : The main script that configures the PPO optimizer and network architecture.
-* `scripts/reinforcement_learning/skrl/play.py` : The inference script to test the Feedforward network.
-* `train_go2.sh` / `play.sh` : Shell wrappers for launching Isaac Lab tasks.
+## 📂 Deep Learning Codebase Structure
+
+The actual PyTorch neural network logic and tensor operations are handled by the Python files within the `scripts` directory. 
+
+* **`scripts/reinforcement_learning/skrl/train.py` (The Optimizer)**
+  - This is the core training script. It initializes the **PPO Agent** (Proximal Policy Optimization).
+  - It sets up the **Loss Functions** (Policy Loss, Value Loss) and the **Adam Optimizer** to calculate gradients and update the neural network weights via backpropagation over millions of iterations.
+
+* **`scripts/reinforcement_learning/skrl/play.py` (The Feedforward Inference)**
+  - This script loads the fully trained `.pt` weight file.
+  - It runs the neural network in `torch.inference_mode()`. It takes the current robot sensor state as an input tensor, passes it through the Feedforward Network, and immediately applies the output tensor as torque commands to the robot's joints.
+
+* **`train_go2.sh` / `play.sh`**
+  - These are simply Bash wrappers that pass the correct arguments to the Python scripts above to launch them within the Isaac Lab python environment.
