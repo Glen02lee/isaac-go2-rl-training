@@ -10,6 +10,34 @@ This project isolates the core Deep Learning algorithms responsible for teaching
 
 ---
 
+## 📸 Visual Demonstrations
+
+Here is a visual progression of our Sim-to-Real deep learning pipeline:
+
+<div align="center">
+  <table style="width:100%; text-align:center;">
+    <tr>
+      <td><b>1. Early Training Phase</b></td>
+      <td><b>2. Massively Parallel RL</b></td>
+    </tr>
+    <tr>
+      <td><img src="./docs/images/early_training.gif" width="350" alt="Early Training Phase"><br><i>The agent struggles to maintain balance and falls frequently during the initial exploration phase.</i></td>
+      <td><img src="./docs/images/parallel_training.png" width="350" alt="Parallel Training"><br><i>4,096 parallel agents trained simultaneously in Isaac Sim, drastically reducing convergence time.</i></td>
+    </tr>
+  </table>
+  <br>
+  <table style="width:100%; text-align:center;">
+    <tr>
+      <td><b>3. Final Result: Autonomous Navigation & SLAM</b></td>
+    </tr>
+    <tr>
+      <td><img src="./docs/images/nav_slam.gif" width="700" alt="Navigation and SLAM"><br><i>The fully trained RL policy seamlessly integrating with ROS 2 RTAB-Map SLAM and Nav2 for autonomous obstacle avoidance.</i></td>
+    </tr>
+  </table>
+</div>
+
+---
+
 ## ⚠️ Prerequisites (Mandatory)
 
 The scripts in this repository are **not standalone Python files**. They are designed to be executed inside the highly optimized Omniverse Python environment. Therefore, you **MUST** have the following software installed and configured on your system before running anything:
