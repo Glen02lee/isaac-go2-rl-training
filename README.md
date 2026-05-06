@@ -51,6 +51,41 @@ The scripts in this repository are **not standalone Python files**. They are des
 
 ## 🧠 Deep Learning Foundations
 
+### 📊 Deep RL Locomotion Architecture
+
+```mermaid
+flowchart LR
+    %% Styling
+    classDef env fill:#e8f4f8,stroke:#0277bd,stroke-width:2px,color:#000;
+    classDef nn fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000;
+    classDef opt fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#000;
+    classDef tensor fill:#f3e5f5,stroke:#8e24aa,stroke-width:1px,color:#000;
+
+    Env[Isaac Sim Environment<br>4,096 Parallel Agents]:::env
+    State([State Tensor<br>Joints, IMU, Target Vel]):::tensor
+    Action([Action Tensor<br>12-DoF Torques]):::tensor
+    Reward([Reward Signal]):::tensor
+    
+    subgraph Deep_Neural_Network [Deep Feedforward Policy MLP]
+        direction LR
+        Input[Input Layer] --> Hidden1[Hidden Layer 1<br>ELU]
+        Hidden1 --> Hidden2[Hidden Layer 2<br>ELU]
+        Hidden2 --> Output[Output Layer]
+    end
+    class Deep_Neural_Network nn;
+
+    Optimizer[PPO Optimizer<br>Gradient Ascent & Adam]:::opt
+
+    Env ==>|Observation| State
+    State ==> Input
+    Output ==>|Sample| Action
+    Action ==>|Physics Step| Env
+    
+    Env -.->|Rollout Batch| Reward
+    Reward -.-> Optimizer
+    Optimizer -.->|Backprop / Weight Update| Deep_Neural_Network
+```
+
 The core architecture of this repository is deeply rooted in the foundational concepts of Modern Practical Deep Networks. The robot's "brain" is designed and optimized based on two critical pillars of Deep Learning:
 
 ### 1. Deep Feedforward Networks (Chapter 6)
