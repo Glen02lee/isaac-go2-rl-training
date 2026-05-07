@@ -168,5 +168,5 @@ The actual PyTorch neural network logic and tensor operations are handled by the
 ---
 
 ## 👥 Team Members
-- **Minseok Lee (이민석)** - 22100504
-- **Sunghwan Shim (심성환)** - 22631005
+- **[Minseok Lee (이민석)](https://github.com/Glen02lee)** - 22100504
+- **[Sunghwan Shim (심성환)](https://github.com/hwan129)** - 22631005
