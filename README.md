@@ -49,121 +49,76 @@ The scripts in this repository are **not standalone Python files**. They are des
 
 ---
 
-## 🧠 Deep Learning Foundations
+## 🧠 Deep Learning Foundations in Robotic Locomotion
 
-### 📊 Deep RL Locomotion Architecture
+While autonomous navigation (e.g., SLAM, path planning) determines *where* the robot should go, this project focuses on the foundational control problem: **how does the robot physically move its joints to walk without falling?** 
 
-```mermaid
-flowchart LR
-    %% Styling
-    classDef env fill:#e8f4f8,stroke:#0277bd,stroke-width:2px,color:#000;
-    classDef nn fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000;
-    classDef opt fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#000;
-    classDef tensor fill:#f3e5f5,stroke:#8e24aa,stroke-width:1px,color:#000;
+This is a highly complex, non-linear control problem that we solve entirely using Deep Learning principles, specifically drawing from **Chapter 6 (Deep Feedforward Networks)** and **Chapter 8 (Optimization for Training Deep Models)** of standard deep learning curriculum.
 
-    Env[Isaac Sim Environment<br>4,096 Parallel Agents]:::env
-    State([State Tensor<br>Joints, IMU, Target Vel]):::tensor
-    Action([Action Tensor<br>12-DoF Torques]):::tensor
-    Reward([Reward Signal]):::tensor
-    
-    subgraph Deep_Neural_Network [Deep Feedforward Policy MLP]
-        direction LR
-        Input[Input Layer] --> Hidden1[Hidden Layer 1<br>ELU]
-        Hidden1 --> Hidden2[Hidden Layer 2<br>ELU]
-        Hidden2 --> Output[Output Layer]
-    end
-    class Deep_Neural_Network nn;
+### 1. Network Architecture (Chapter 6: Deep Feedforward Networks)
+To control a 12-DoF (Degrees of Freedom) quadruped, traditional robotics requires complex kinematic equations. Instead, we approximate this control function using a **Multi-Layer Perceptron (MLP)**.
 
-    Optimizer[PPO Optimizer<br>Gradient Ascent & Adam]:::opt
+* **Input Layer (State Tensor):** The network continuously receives a high-dimensional observation vector. This is not camera data, but purely proprioceptive sensory inputs representing the robot's physical state:
+  * **Gravity Vector:** To understand body orientation and tilt.
+  * **Joint States:** The current position and velocity of all 12 motors.
+  * **Velocity Command:** The user's desired linear/angular velocity vector (e.g., move forward at 1.0 m/s).
+* **Hidden Layers (Feature Extraction):** Multiple dense layers equipped with non-linear activation functions (ELU) extract complex, spatial-temporal features from the raw sensory data. These layers build internal representations of "balance" and "momentum."
+* **Output Layer (Action Tensor):** The network outputs a 12-dimensional vector. This output is directly mapped to target joint positions or torques applied to the physical motors at the next time step.
 
-    Env ==>|Observation| State
-    State ==> Input
-    Output ==>|Sample| Action
-    Action ==>|Physics Step| Env
-    
-    Env -.->|Rollout Batch| Reward
-    Reward -.-> Optimizer
-    Optimizer -.->|Backprop / Weight Update| Deep_Neural_Network
-```
+### 2. Training Strategy (Chapter 8: Optimization for Deep Models)
+Training a neural network from a random initialization to walk is a severely non-convex optimization problem with an incredibly sparse reward landscape (the robot mostly falls in the beginning). We utilize advanced optimization techniques to find a robust local minimum.
 
-The core architecture of this repository is deeply rooted in the foundational concepts of Modern Practical Deep Networks. The robot's "brain" is designed and optimized based on two critical pillars of Deep Learning:
-
-### 1. Deep Feedforward Networks (Chapter 6)
-The agent's policy (the brain, `best_agent.pt`) is structured as a **Multi-Layer Perceptron (MLP)**, a classic Deep Feedforward Network.
-* **Input Layer (State):** Receives massive streams of proprioceptive data from the robot in real-time, including joint positions, joint velocities, base orientation (gravity vector), and the user's target velocity commands.
-* **Hidden Layers:** Transforms these raw sensory inputs through non-linear activation functions (e.g., ELU/ReLU), extracting complex spatial and kinetic representations of the robot's state.
-* **Output Layer (Action):** Outputs a continuous probability distribution mapping to target joint positions or torques for all 12 motors simultaneously.
-
-### 2. Optimization for Training Deep Models (Chapter 8)
-Training a quadruped to walk from scratch is a highly non-convex optimization problem. We utilize **PPO (Proximal Policy Optimization)** via the SKRL library to update the network weights.
-* **Massive Parallelization:** We spawn **4,096 robots simultaneously** in Isaac Sim. This generates massive batch sizes, significantly reducing the variance of the gradient estimates and providing stable optimization.
-* **Gradient Descent & Reward Maximization:** The Adam optimizer updates the network's weights iteratively. It strictly follows the gradients calculated via backpropagation to maximize the cumulative reward (e.g., matching target velocity, minimizing joint energy, and penalizing falls).
+* **Surrogate Objective Function (PPO Loss):** Instead of a simple Mean Squared Error, the network optimizes a Proximal Policy Optimization (PPO) loss function. It aims to maximize a cumulative **Reward Signal** (e.g., moving at the target velocity, keeping the base stable) while penalizing undesirable behaviors (e.g., excessive energy usage, falling over).
+* **Adam Optimizer:** We use the Adam optimization algorithm, which adapts the learning rate for each network weight individually based on the first and second moments of the gradients. This is critical for navigating the complex loss landscape of locomotion.
+* **Massive Mini-Batching for Gradient Stability:** To compute accurate gradients via Backpropagation, we must overcome the high variance of RL exploration. We achieve this by simulating **4,096 parallel environments** simultaneously in Isaac Sim. This generates massive, diverse mini-batches of state-action-reward data per iteration, drastically stabilizing the gradient updates and accelerating convergence.
 
 ---
 
 ## ⚙️ How to Train the Model
 
-### Step 1: Start the Training Process
-To begin the optimization process, simply run the training script. 
+### Step 1: Start the Optimization Process
+To begin training the network weights, run:
 
 ```bash
 ./train_go2.sh
 ```
-* **What happens under the hood:**
-  1. The script calls `./isaaclab.sh` to initialize the Omniverse environment.
-  2. It launches Isaac Sim in **Headless Mode** (no visual UI). This is crucial because rendering graphics wastes GPU memory. By hiding the screen, we dedicate 100% of the RTX GPU's VRAM and CUDA cores to PyTorch tensor calculations and physics simulations.
-  3. It spawns 4,096 Go2 robots on a flat plane. 
-  4. The SKRL library begins the PPO loop: collecting states, calculating rewards, computing the loss, and performing backpropagation to update the MLP weights.
+* **Under the hood:** This script launches Isaac Sim in Headless Mode (saving GPU VRAM for PyTorch tensor operations) and spawns 4,096 robots. The SKRL library orchestrates the PPO loop, performing forward passes to collect data, calculating the loss, and executing backpropagation via the Adam optimizer to iteratively update the MLP weights.
 
-### Step 2: Monitor the Output (Tensorboard)
-While the training is running, it will continuously output logs. The most important metric to watch is the **Reward**. As the iterations increase, the reward should climb, indicating the neural network is learning to balance and walk rather than falling over.
+### Step 2: Monitor Optimization (Tensorboard)
+Monitor the training logs. The key metric is the **Reward**. As the optimizer successfully descends the loss landscape, the cumulative reward will climb, indicating the MLP is learning structural representations of walking.
 
-### Step 3: Extract the Trained Weights (The Output)
-Once you stop the training (or when it completes its maximum iterations), the entire neural network's knowledge is compressed and saved into a single PyTorch weight file.
-
-* **Where is it saved?** 
-  Navigate to the `logs` folder generated in your directory:
-  `logs/skrl/unitree_go2_flat/<DATE_TIME>_ppo_torch/checkpoints/`
-* **The Output File:** You will see files like `agent_1000.pt`, `agent_2000.pt`, and finally **`best_agent.pt`**. This `.pt` file is the literal "brain" of the robot.
+### Step 3: The Output (`best_agent.pt`)
+The entire optimization process results in a single, frozen PyTorch weight file (`best_agent.pt`). This file contains the optimized parameters of our Deep Feedforward Network.
 
 ---
 
 ## 🏃 How to Test the Trained Model (Inference)
 
-To see your newly trained brain in action, you must plug the `.pt` output file into the inference script.
+To evaluate the trained network in a live physics simulation:
 
 ### 1. Update the Play Script
-Open the `play.sh` file and point the `+checkpoint=` argument to the exact path of your newly generated `best_agent.pt` file.
+Point the `+checkpoint=` argument in `play.sh` to your newly trained weight file.
 
-```bash
-# Example inside play.sh
-./isaaclab.sh -p scripts/reinforcement_learning/skrl/play.py --task Isaac-Velocity-Flat-Unitree-Go2-v0 --num_envs 1 +checkpoint="logs/skrl/unitree_go2_flat/YOUR_NEW_FOLDER/checkpoints/best_agent.pt"
-```
-
-### 2. Run the Feedforward Network
-Execute the play script to launch the visual simulation.
-
+### 2. Run the Feedforward Pass
 ```bash
 ./play.sh
 ```
-* **What happens under the hood:**
-  1. The simulation spawns exactly **1 robot** and opens the Isaac Sim UI so you can watch it.
-  2. The Python code loads your `best_agent.pt` into memory and sets `torch.inference_mode()`. This freezes the weights (no more learning).
-  3. The script continuously performs forward passes (Feedforward) through the MLP. You can use your keyboard (`W, A, S, D`) to send target velocity vectors into the input layer, and watch the output layer generate perfect joint torques to make the robot walk smoothly!
+* **Under the hood:** The script loads the `.pt` file and sets `torch.inference_mode()`, freezing the network weights. As the simulation runs, the script continuously performs **Feedforward passes** through the MLP, transforming the current state tensor into instantaneous motor torque commands in real-time.
 
 ---
 
 ## 📂 Deep Learning Codebase Structure
 
-The actual PyTorch neural network logic and tensor operations are handled by the Python files within the `scripts` directory. 
+The mapping of Deep Learning concepts to our PyTorch codebase:
 
 * **`scripts/reinforcement_learning/skrl/train.py` (The Optimizer)**
-  - This is the core training script. It initializes the **PPO Agent** (Proximal Policy Optimization).
-  - It sets up the **Loss Functions** (Policy Loss, Value Loss) and the **Adam Optimizer** to calculate gradients and update the neural network weights via backpropagation over millions of iterations.
+  - Implements the optimization logic (Chapter 8).
+  - Initializes the neural network, defines the PPO loss function, and configures the Adam optimizer.
+  - Manages the collection of the massive 4,096-agent batch data required for stable backpropagation.
 
 * **`scripts/reinforcement_learning/skrl/play.py` (The Feedforward Inference)**
-  - This script loads the fully trained `.pt` weight file.
-  - It runs the neural network in `torch.inference_mode()`. It takes the current robot sensor state as an input tensor, passes it through the Feedforward Network, and immediately applies the output tensor as torque commands to the robot's joints.
+  - Implements the execution phase (Chapter 6).
+  - Handles the real-time mapping of Isaac Sim sensor data into the Input Tensor, passes it through the MLP, and applies the Output Tensor back to the physics engine.
 
 ---
 
