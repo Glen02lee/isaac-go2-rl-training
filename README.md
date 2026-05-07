@@ -146,8 +146,10 @@ To begin training the network weights, run:
 ### Step 2: Monitor Optimization (Tensorboard)
 Monitor the training logs. The key metric is the **Reward**. As the optimizer successfully descends the loss landscape, the cumulative reward will climb, indicating the MLP is learning structural representations of walking.
 
-### Step 3: The Output (`best_agent.pt`)
-The entire optimization process results in a single, frozen PyTorch weight file (`best_agent.pt`). This file contains the optimized parameters of our Deep Feedforward Network.
+### Step 3: Checkpointing and The Optimal Policy (`best_agent.pt`)
+Deep RL training is an iterative process that typically runs for thousands of iterations (e.g., 5,000 to 10,000). 
+* **Periodic Checkpoints:** As the optimization progresses, the system saves the network's weights at regular intervals (e.g., `agent_1000.pt`, `agent_2000.pt`). These serve as historical snapshots of the learning process.
+* **The Best Agent:** RL training is prone to instability—a model might walk perfectly at iteration 3,000 but "forget" how to walk by iteration 4,000 due to over-exploration or bad gradient updates. To solve this, the SKRL library continuously tracks the average episodic reward. The specific set of weights that achieved the **highest historical reward** is automatically isolated and saved as `best_agent.pt`. This ensures we always extract the absolute optimal policy, regardless of any future training degradation.
 
 ---
 
