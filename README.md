@@ -58,6 +58,37 @@ This is a highly complex, non-linear control problem that we solve entirely usin
 ### 1. Network Architecture (Chapter 6: Deep Feedforward Networks)
 To control a 12-DoF (Degrees of Freedom) quadruped, traditional robotics requires complex kinematic equations. Instead, we approximate this control function using a **Multi-Layer Perceptron (MLP)**.
 
+```mermaid
+graph LR
+    %% Colors and Styles
+    classDef inputLayer fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef hiddenLayer fill:#fff3e0,stroke:#ef6c00,stroke-width:2px;
+    classDef outputLayer fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef tensor fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1px,stroke-dasharray: 5 5;
+
+    %% Nodes
+    I_State["Input Tensor<br>(Observation State)"]:::tensor
+    
+    subgraph MLP [Deep Feedforward Policy Network]
+        direction LR
+        L1["Input Layer<br>Dim: [N]"]:::inputLayer
+        H1["Hidden Layer 1<br>Dim: [512]<br>Activation: ELU"]:::hiddenLayer
+        H2["Hidden Layer 2<br>Dim: [256]<br>Activation: ELU"]:::hiddenLayer
+        H3["Hidden Layer 3<br>Dim: [128]<br>Activation: ELU"]:::hiddenLayer
+        O1["Output Layer<br>Dim: [12]"]:::outputLayer
+    end
+
+    O_Action["Output Tensor<br>(Joint Torques)"]:::tensor
+
+    %% Connections
+    I_State -->|e.g., Gravity, Joint Vel,<br>Command Vel| L1
+    L1 --> H1
+    H1 --> H2
+    H2 --> H3
+    H3 --> O1
+    O1 -->|Mapped to 12 Motors| O_Action
+```
+
 * **Input Layer (State Tensor):** The network continuously receives a high-dimensional observation vector. This is not camera data, but purely proprioceptive sensory inputs representing the robot's physical state:
   * **Gravity Vector:** To understand body orientation and tilt.
   * **Joint States:** The current position and velocity of all 12 motors.
@@ -67,6 +98,32 @@ To control a 12-DoF (Degrees of Freedom) quadruped, traditional robotics require
 
 ### 2. Training Strategy (Chapter 8: Optimization for Deep Models)
 Training a neural network from a random initialization to walk is a severely non-convex optimization problem with an incredibly sparse reward landscape (the robot mostly falls in the beginning). We utilize advanced optimization techniques to find a robust local minimum.
+
+```mermaid
+flowchart TD
+    %% Styling
+    classDef env fill:#e8f4f8,stroke:#0277bd,stroke-width:2px;
+    classDef opt fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef loss fill:#ffebee,stroke:#c62828,stroke-width:2px;
+
+    subgraph Isaac_Sim [Massive Parallel Simulation]
+        E1[Environment 1]:::env
+        E2[Environment 2]:::env
+        E_Dots[...]:::env
+        E4096[Environment 4096]:::env
+    end
+
+    Batch[Massive Mini-Batch<br>State, Action, Reward]:::env
+    Loss[PPO Surrogate Loss<br>Reward Maximization]:::loss
+    Adam[Adam Optimizer<br>Gradient Descent]:::opt
+    Weights[(MLP Weights)]:::opt
+
+    Isaac_Sim -->|Collect Rollouts| Batch
+    Batch --> Loss
+    Loss -->|Backpropagation| Adam
+    Adam -->|Update| Weights
+    Weights -.->|New Policy| Isaac_Sim
+```
 
 * **Surrogate Objective Function (PPO Loss):** Instead of a simple Mean Squared Error, the network optimizes a Proximal Policy Optimization (PPO) loss function. It aims to maximize a cumulative **Reward Signal** (e.g., moving at the target velocity, keeping the base stable) while penalizing undesirable behaviors (e.g., excessive energy usage, falling over).
 * **Adam Optimizer:** We use the Adam optimization algorithm, which adapts the learning rate for each network weight individually based on the first and second moments of the gradients. This is critical for navigating the complex loss landscape of locomotion.
