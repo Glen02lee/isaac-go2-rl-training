@@ -107,12 +107,8 @@ flowchart TD
     classDef loss fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#000;
     classDef weight fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000;
 
-    subgraph Isaac_Sim [NVIDIA Isaac Sim: 4,096 Parallel Environments]
-        direction LR
-        R1[Agent 1]:::env
-        R2[Agent 2]:::env
-        Rdots[...]:::env
-        Rn[Agent 4096]:::env
+    subgraph Isaac_Sim [NVIDIA Isaac Sim]
+        Agents[Parallel Agents 1 to 4,096*]:::env
     end
 
     Batch[Massive Mini-Batch<br>State, Action, Reward]:::env
@@ -129,7 +125,7 @@ flowchart TD
 
 * **Surrogate Objective Function (PPO Loss):** Instead of a simple Mean Squared Error, the network optimizes a Proximal Policy Optimization (PPO) loss function. It aims to maximize a cumulative **Reward Signal** (e.g., moving at the target velocity, keeping the base stable) while penalizing undesirable behaviors (e.g., excessive energy usage, falling over).
 * **Adam Optimizer:** We use the Adam optimization algorithm, which adapts the learning rate for each network weight individually based on the first and second moments of the gradients. This is critical for navigating the complex loss landscape of locomotion.
-* **Massive Mini-Batching for Gradient Stability:** To compute accurate gradients via Backpropagation, we must overcome the high variance of RL exploration. We achieve this by simulating **4,096 parallel environments** simultaneously in Isaac Sim. This generates massive, diverse mini-batches of state-action-reward data per iteration, drastically stabilizing the gradient updates and accelerating convergence.
+* **Massive Mini-Batching for Gradient Stability:** To compute accurate gradients via Backpropagation, we must overcome the high variance of RL exploration. We achieve this by simulating **4,096 parallel environments** simultaneously in Isaac Sim. This generates massive, diverse mini-batches of state-action-reward data per iteration, drastically stabilizing the gradient updates and accelerating convergence. *(Note: 4,096 is a default configurable hyperparameter, which can be scaled up or down based on available GPU VRAM).*
 
 ---
 
