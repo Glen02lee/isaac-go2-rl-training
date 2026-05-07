@@ -164,3 +164,9 @@ The actual PyTorch neural network logic and tensor operations are handled by the
 * **`scripts/reinforcement_learning/skrl/play.py` (The Feedforward Inference)**
   - This script loads the fully trained `.pt` weight file.
   - It runs the neural network in `torch.inference_mode()`. It takes the current robot sensor state as an input tensor, passes it through the Feedforward Network, and immediately applies the output tensor as torque commands to the robot's joints.
+
+---
+
+## 👥 Team Members
+- **Minseok Lee (이민석)** - 22100504
+- **Sunghwan Shim (심성환)** - 22631005
