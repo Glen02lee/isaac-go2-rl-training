@@ -109,10 +109,10 @@ flowchart TD
 
     subgraph Isaac_Sim [NVIDIA Isaac Sim: 4,096 Parallel Environments]
         direction LR
-        R1[🤖 Agent 1]:::env
-        R2[🤖 Agent 2]:::env
+        R1[Agent 1]:::env
+        R2[Agent 2]:::env
         Rdots[...]:::env
-        Rn[🤖 Agent 4096]:::env
+        Rn[Agent 4096]:::env
     end
 
     Batch[Massive Mini-Batch<br>State, Action, Reward]:::env
