@@ -102,27 +102,29 @@ Training a neural network from a random initialization to walk is a severely non
 ```mermaid
 flowchart TD
     %% Styling
-    classDef env fill:#e8f4f8,stroke:#0277bd,stroke-width:2px;
-    classDef opt fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef loss fill:#ffebee,stroke:#c62828,stroke-width:2px;
+    classDef env fill:#e8f4f8,stroke:#0277bd,stroke-width:2px,color:#000;
+    classDef opt fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#000;
+    classDef loss fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#000;
+    classDef weight fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000;
 
-    subgraph Isaac_Sim [Massive Parallel Simulation]
-        E1[Environment 1]:::env
-        E2[Environment 2]:::env
-        E_Dots[...]:::env
-        E4096[Environment 4096]:::env
+    subgraph Isaac_Sim [NVIDIA Isaac Sim: 4,096 Parallel Environments]
+        direction LR
+        R1[🤖 Agent 1]:::env
+        R2[🤖 Agent 2]:::env
+        Rdots[...]:::env
+        Rn[🤖 Agent 4096]:::env
     end
 
     Batch[Massive Mini-Batch<br>State, Action, Reward]:::env
     Loss[PPO Surrogate Loss<br>Reward Maximization]:::loss
     Adam[Adam Optimizer<br>Gradient Descent]:::opt
-    Weights[(MLP Weights)]:::opt
+    Weights[(MLP Weights)]:::weight
 
     Isaac_Sim -->|Collect Rollouts| Batch
     Batch --> Loss
     Loss -->|Backpropagation| Adam
     Adam -->|Update| Weights
-    Weights -.->|New Policy| Isaac_Sim
+    Weights -.->|Deploy Updated Policy| Isaac_Sim
 ```
 
 * **Surrogate Objective Function (PPO Loss):** Instead of a simple Mean Squared Error, the network optimizes a Proximal Policy Optimization (PPO) loss function. It aims to maximize a cumulative **Reward Signal** (e.g., moving at the target velocity, keeping the base stable) while penalizing undesirable behaviors (e.g., excessive energy usage, falling over).
