@@ -28,10 +28,12 @@ Here is a visual progression of our Sim-to-Real deep learning pipeline:
   <br>
   <table style="width:100%; text-align:center;">
     <tr>
-      <td><b>3. Final Result: Autonomous Navigation & SLAM</b></td>
+      <td><b>3-1. SLAM</b></td>
+      <td><b>3-2. Autonomous Navigation (Nav2)</b></td>
     </tr>
     <tr>
-      <td><img src="./docs/images/nav_slam.gif" width="700" alt="Navigation and SLAM"><br><i>The fully trained RL policy seamlessly integrating with ROS 2 RTAB-Map SLAM and Nav2 for autonomous obstacle avoidance.</i></td>
+      <td><img src="./docs/images/nav_slam.gif" width="350" alt="SLAM"><br><i>The fully trained RL policy seamlessly integrating with ROS 2 RTAB-Map SLAM.</i></td>
+      <td><img src="./docs/images/주행테스트 성공.webm.gif" width="350" alt="Autonomous Navigation (Nav2)"><br><i>Successful autonomous driving and obstacle avoidance utilizing the ROS 2 Nav2 stack.</i></td>
     </tr>
   </table>
 </div>
