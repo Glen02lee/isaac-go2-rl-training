@@ -15,27 +15,29 @@ This project isolates the core Deep Learning algorithms responsible for teaching
 Here is a visual progression of our Sim-to-Real deep learning pipeline:
 
 <div align="center">
-  <table style="width:100%; text-align:center;">
-    <tr>
-      <td><b>1. Early Training Phase</b></td>
-      <td><b>2. Massively Parallel RL</b></td>
-    </tr>
-    <tr>
-      <td><img src="./docs/images/early_training.gif" width="350" alt="Early Training Phase"><br><i>The agent struggles to maintain balance and falls frequently during the initial exploration phase.</i></td>
-      <td><img src="./docs/images/parallel_training.png" width="350" alt="Parallel Training"><br><i>4,096 parallel agents trained simultaneously in Isaac Sim, drastically reducing convergence time.</i></td>
-    </tr>
-  </table>
-  <br>
-  <table style="width:100%; text-align:center;">
-    <tr>
-      <td><b>3-1. SLAM</b></td>
-      <td><b>3-2. Autonomous Navigation (Nav2)</b></td>
-    </tr>
-    <tr>
-      <td><img src="./docs/images/nav_slam.gif" width="350" alt="SLAM"><br><i>The fully trained RL policy seamlessly integrating with ROS 2 RTAB-Map SLAM.</i></td>
-      <td><img src="./docs/images/주행테스트 성공.webm.gif" width="350" alt="Autonomous Navigation (Nav2)"><br><i>Successful autonomous driving and obstacle avoidance utilizing the ROS 2 Nav2 stack.</i></td>
-    </tr>
-  </table>
+
+  <h3>1. Early Training Phase <br><i>(Focus: Chapter 8 - Optimization Challenges)</i></h3>
+  <img src="./docs/images/early_training.gif" width="600" alt="Early Training Phase">
+  <p><i>The agent struggles to maintain balance and falls frequently during the initial exploration phase.<br>This highlights the highly non-convex optimization problem and the sparse reward landscape discussed in Chapter 8.</i></p>
+
+  <br><hr style="width:70%;"><br>
+
+  <h3>2. Massively Parallel RL <br><i>(Focus: Chapter 8 - Stable Gradient Descent)</i></h3>
+  <img src="./docs/images/parallel_training.png" width="600" alt="Parallel Training">
+  <p><i>4,096 parallel agents trained simultaneously in Isaac Sim.<br>This massive mini-batching approach ensures stable gradient updates for the Adam optimizer, significantly accelerating convergence (Chapter 8).</i></p>
+
+  <br><hr style="width:70%;"><br>
+
+  <h3>3-1. SLAM Integration <br><i>(Focus: Chapter 6 - Deep Feedforward Execution)</i></h3>
+  <img src="./docs/images/nav_slam.gif" width="600" alt="SLAM">
+  <p><i>The fully trained Multi-Layer Perceptron (Chapter 6) seamlessly maps state tensors to joint torques in real-time,<br>maintaining balance while integrating with ROS 2 RTAB-Map SLAM for spatial mapping.</i></p>
+
+  <br><hr style="width:70%;"><br>
+
+  <h3>3-2. Final Goal: Autonomous Navigation <br><i>(Applying Chapter 6 & 8 in the Real World)</i></h3>
+  <img src="./docs/images/주행테스트 성공.webm.gif" width="600" alt="Autonomous Navigation (Nav2)">
+  <p><i>Successful autonomous driving and obstacle avoidance utilizing the ROS 2 Nav2 stack.<br>The Deep Learning policy (Chapters 6 & 8) robustly handles the foundational locomotion while Nav2 directs the higher-level path planning.</i></p>
+
 </div>
 
 ---
