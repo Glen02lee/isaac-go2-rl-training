@@ -182,6 +182,19 @@ The mapping of Deep Learning concepts to our PyTorch codebase:
 
 ---
 
+## 🚀 What's Next? (Sim-to-Real)
+
+While our current model successfully navigates the simulated environment, the ultimate goal of Deep RL in robotics is **Sim-to-Real transfer**. 
+
+<div align="center">
+  <img src="./docs/images/shaking%20hands.gif" width="400" alt="Real Go2 Waving"><br>
+  <i>The real Unitree Go2 robot performing a physical action. The next phase involves deploying our trained MLP brain directly into this physical hardware.</i>
+</div>
+
+Future iterations will focus on minimizing the "reality gap" by introducing Domain Randomization (varying mass, friction, and motor latency during training) so the `best_agent.pt` can seamlessly control the physical Unitree Go2 robot in the real world!
+
+---
+
 ## 👥 Team Members
 - **[Minseok Lee (이민석)](https://github.com/Glen02lee)** - 22100504
 - **[Sunghwan Shim (심성환)](https://github.com/hwan129)** - 22631005
