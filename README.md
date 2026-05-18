@@ -147,6 +147,17 @@ Monitor the training logs. The key metric is the **Reward**. As the optimizer su
 
 ### Step 3: Checkpointing and The Optimal Policy (`best_agent.pt` / Chapter 7)
 Deep RL training is an iterative process that typically runs for thousands of iterations (e.g., 5,000 to 10,000). 
+
+```mermaid
+xychart-beta
+    title "Optimization & Early Stopping (Chapter 7 & 8)"
+    x-axis "Training Iterations" [0, 1000, 2000, 3000, 4000, 5000]
+    y-axis "Cumulative Reward" 0 --> 100
+    bar [10, 40, 75, 95, 80, 65]
+    line [10, 40, 75, 95, 80, 65]
+```
+*(Conceptual graph: At iteration 3,000, the reward peaks. By iteration 4,000, the agent over-explores and performance degrades. The system saves the weights from iteration 3,000 as `best_agent.pt`.)*
+
 * **Periodic Checkpoints:** As the optimization progresses, the system saves the network's weights at regular intervals (e.g., `agent_1000.pt`, `agent_2000.pt`). These serve as historical snapshots of the learning process.
 * **Regularization via Early Stopping (Chapter 7):** RL training is highly prone to instability—a model might walk perfectly at iteration 3,000 but "forget" how to walk by iteration 4,000 due to over-exploration or bad gradient updates (a form of overfitting to recent batches). To solve this, we apply a concept from **Chapter 7 (Regularization for Deep Learning)**: **Early Stopping**. The SKRL library continuously evaluates the agent and tracks the average episodic reward. The specific set of weights that achieved the **highest historical reward** is automatically isolated and saved as `best_agent.pt`. This acts as a regularization technique, ensuring we always extract the absolute optimal, most generalized policy, regardless of any future training degradation.
 
