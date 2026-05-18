@@ -56,7 +56,7 @@ The scripts in this repository are **not standalone Python files**. They are des
 
 While autonomous navigation (e.g., SLAM, path planning) determines *where* the robot should go, this project focuses on the foundational control problem: **how does the robot physically move its joints to walk without falling?** 
 
-This is a highly complex, non-linear control problem that we solve entirely using Deep Learning principles, specifically drawing from **Chapter 6 (Deep Feedforward Networks)** and **Chapter 8 (Optimization for Training Deep Models)** of standard deep learning curriculum.
+This is a highly complex, non-linear control problem that we solve entirely using Deep Learning principles, specifically drawing from **Chapter 6 (Deep Feedforward Networks)**, **Chapter 7 (Regularization)**, and **Chapter 8 (Optimization for Training Deep Models)** of standard deep learning curriculum.
 
 ### 1. Network Architecture (Chapter 6: Deep Feedforward Networks)
 To control a 12-DoF (Degrees of Freedom) quadruped, traditional robotics requires complex kinematic equations. Instead, we approximate this control function using a **Multi-Layer Perceptron (MLP)**.
@@ -145,10 +145,10 @@ To begin training the network weights, run:
 ### Step 2: Monitor Optimization (Tensorboard)
 Monitor the training logs. The key metric is the **Reward**. As the optimizer successfully descends the loss landscape, the cumulative reward will climb, indicating the MLP is learning structural representations of walking.
 
-### Step 3: Checkpointing and The Optimal Policy (`best_agent.pt`)
+### Step 3: Checkpointing and The Optimal Policy (`best_agent.pt` / Chapter 7)
 Deep RL training is an iterative process that typically runs for thousands of iterations (e.g., 5,000 to 10,000). 
 * **Periodic Checkpoints:** As the optimization progresses, the system saves the network's weights at regular intervals (e.g., `agent_1000.pt`, `agent_2000.pt`). These serve as historical snapshots of the learning process.
-* **The Best Agent:** RL training is prone to instability—a model might walk perfectly at iteration 3,000 but "forget" how to walk by iteration 4,000 due to over-exploration or bad gradient updates. To solve this, the SKRL library continuously tracks the average episodic reward. The specific set of weights that achieved the **highest historical reward** is automatically isolated and saved as `best_agent.pt`. This ensures we always extract the absolute optimal policy, regardless of any future training degradation.
+* **Regularization via Early Stopping (Chapter 7):** RL training is highly prone to instability—a model might walk perfectly at iteration 3,000 but "forget" how to walk by iteration 4,000 due to over-exploration or bad gradient updates (a form of overfitting to recent batches). To solve this, we apply a concept from **Chapter 7 (Regularization for Deep Learning)**: **Early Stopping**. The SKRL library continuously evaluates the agent and tracks the average episodic reward. The specific set of weights that achieved the **highest historical reward** is automatically isolated and saved as `best_agent.pt`. This acts as a regularization technique, ensuring we always extract the absolute optimal, most generalized policy, regardless of any future training degradation.
 
 ---
 
