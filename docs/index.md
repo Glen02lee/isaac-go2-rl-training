@@ -66,11 +66,19 @@ To resolve these challenges, this project applies **Deep Reinforcement Learning 
 We formulate the locomotion problem as a Reinforcement Learning task under a Markov Decision Process (MDP). The agent interacts with the Isaac Sim physics environment to learn an optimal policy $\pi_\theta(a|s)$ parameterized by the weights $\theta$ of a deep neural network.
 
 ### A. State and Action Space
-* **State Space ($s_t$):** High-dimensional proprioceptive observations including the gravity vector (body orientation), joint positions and velocities of all 12 motors, and the user's velocity commands (linear and angular).
-* **Action Space ($a_t$):** 12-dimensional continuous joint target angles, which are subsequently mapped to motor torques via Proportional-Derivative (PD) controllers.
-* **Reward Function ($r_t$):** A multi-objective reward function that balances velocity tracking accuracy, base stability (keeping the body flat), and energy conservation (penalizing high joint torque changes and falls).
+
+To formalize the locomotion task, we map the robot's physical variables to RL state and action spaces:
+
+| Space | Dimension / Components | Description |
+| :--- | :--- | :--- |
+| **State Space ($s_t$)** | **Proprioceptive observations** | Projected gravity vector (body tilt), joint positions & velocities (12 DoF), and linear/angular velocity commands ($v_x, v_y, \omega_z$). |
+| **Action Space ($a_t$)** | **12 Dimensions** | Target joint positions for the 12 actuators, processed via Proportional-Derivative (PD) controllers to apply motor torques. |
+| **Reward Function ($r_t$)** | **Multi-objective sum** | Reward for velocity tracking ($r_{vel}$), base stability ($r_{stable}$), and penalties for falling ($p_{fall}$) and high energy torque changes ($p_{torque}$). |
+
+---
 
 ### B. Network Architecture (Chapter 6: Deep Feedforward Networks)
+
 To approximate the control function, we design a Multi-Layer Perceptron (MLP) that processes state inputs and outputs motor commands in real-time.
 
 ```mermaid
@@ -106,7 +114,10 @@ graph LR
 
 * **Hidden Layers:** Three dense layers with **ELU (Exponential Linear Unit)** activations are utilized to handle negative inputs and avoid the vanishing gradient problem, allowing the network to capture complex, non-linear relationships.
 
+---
+
 ### C. Optimization Strategy (Chapter 8: Optimization for Deep Models)
+
 Training the policy network starting from a random initialization is a severely non-convex optimization problem with a sparse reward landscape. To achieve convergence and stability, we utilize:
 * **Proximal Policy Optimization (PPO) Loss:** A surrogate objective function that clips probability updates, ensuring the policy does not deviate too far from the previous iteration, preventing catastrophic performance drops.
 * **Adam Optimizer:** An adaptive learning rate optimization algorithm that computes individual learning rates for each weight based on running estimates of the first and second moments of the gradients.
@@ -141,33 +152,45 @@ flowchart TD
 ## 3. Experiments & Implementation
 
 ### A. Prerequisites (Mandatory)
-The training scripts run inside the Omniverse Python environment.
-1. **NVIDIA Isaac Sim (5.1.0):** The physics and rendering simulator.
-2. **Isaac Lab (4.1.0):** The RL wrapper framework. `isaaclab.sh` must be configured in your path.
+The simulation requires the following software ecosystem:
+* 🛠️ **NVIDIA Isaac Sim (5.1.0):** The core physics and photorealistic rendering engine.
+* 📦 **Isaac Lab (4.1.0):** The robot learning wrapper framework. Ensure `isaaclab.sh` is configured in your system path.
+
+---
 
 ### B. Training the Model
-To initiate backpropagation and optimize network weights, run:
-```bash
-./train_go2.sh
-```
-* **Mechanism:** The script starts Isaac Sim in headless mode. The **SKRL** library coordinates the training loop, feeding state inputs to the MLP, computing the PPO loss, and updating weights using the Adam optimizer.
+1. **Launch the Training Script:**
+   ```bash
+   ./train_go2.sh
+   ```
+2. **Mechanism:** The script starts Isaac Sim in headless mode. The **SKRL** library coordinates the training loop, feeding state inputs to the MLP, computing the PPO loss, and updating weights using the Adam optimizer across **4,096 parallel environments** on the GPU.
+
+---
 
 ### C. Inference (Testing)
-To test the generalized capabilities of the network:
-```bash
-./play.sh
-```
-* **Mechanism:** The model weights are frozen using `torch.inference_mode()`. Feedforward passes map sensory inputs directly to motor targets at 50 Hz.
+1. **Run the Inference Script:**
+   ```bash
+   ./play.sh
+   ```
+2. **Mechanism:** The model weights are frozen using `torch.inference_mode()`. Feedforward passes map sensory inputs directly to motor targets at 50 Hz.
+
+---
 
 ### D. Codebase Mapping
-* **[train.py](file:///C:/Users/USER/Desktop/캡스톤/go2/isaac-go2-rl-training/scripts/reinforcement_learning/skrl/train.py):** Sets up PPO hyperparameters, initializes the MLP, and runs the gradient descent loop.
-* **[play.py](file:///C:/Users/USER/Desktop/캡스톤/go2/isaac-go2-rl-training/scripts/reinforcement_learning/skrl/play.py):** Implements real-time feedforward inference using `best_agent.pt`.
+
+We map the core deep learning concepts directly to our PyTorch implementation:
+
+* 🖥️ **[train.py](file:///C:/Users/USER/Desktop/캡스톤/go2/isaac-go2-rl-training/scripts/reinforcement_learning/skrl/train.py) (The Optimization Loop):**
+  Sets up PPO loss hyperparameters, configures the Adam optimizer, and orchestrates the massive 4,096-agent rollout collection for gradient backpropagation.
+* 🎮 **[play.py](file:///C:/Users/USER/Desktop/캡스톤/go2/isaac-go2-rl-training/scripts/reinforcement_learning/skrl/play.py) (The Inference Engine):**
+  Loads `best_agent.pt`, configures the inference environment, and executes feedforward passes to output motor commands in real-time.
 
 ---
 
 ## 4. Results & Analysis
 
 ### A. Optimization and Regularization (Chapter 7: Regularization)
+
 Deep RL is highly prone to instability; policies may overfit to recent exploration paths and "forget" how to walk (catastrophic forgetting). To prevent this, we apply **Early Stopping** (a core concept in Chapter 7).
 
 ```mermaid
@@ -180,6 +203,8 @@ xychart-beta
 ```
 
 The system continuously tracks episodic performance and automatically saves the checkpoint that achieved the **highest historical reward** as `best_agent.pt`. This acts as a regularization mechanism, extracting the most generalized model before performance degrades.
+
+---
 
 ### B. Visual Demonstrations
 
