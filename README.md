@@ -15,9 +15,14 @@
 
 ## 🎥 Project Presentation Video (YouTube)
 
-[![Project Video](https://img.youtube.com/vi/mHaLuUE3lUo/0.jpg)](https://youtu.be/mHaLuUE3lUo)
-
-*(Click the image above to watch the full 7-minute presentation on YouTube)*
+<div align="center">
+  <a href="https://youtu.be/mHaLuUE3lUo">
+    <img src="https://img.youtube.com/vi/mHaLuUE3lUo/0.jpg" alt="Project Presentation Video" width="600">
+  </a>
+  <br><br>
+  <p><i>Click the image above or use the link below to watch the full 7-minute presentation on YouTube:</i></p>
+  <p><b>🔗 Link: <a href="https://youtu.be/mHaLuUE3lUo">https://youtu.be/mHaLuUE3lUo</a></b></p>
+</div>
 
 ---
 
