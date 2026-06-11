@@ -184,7 +184,7 @@ xychart-beta
     title "Optimization & Early Stopping (Chapter 7 & 8)"
     x-axis "Training Iterations" [0, 1000, 2000, 3000, 4000, 5000]
     y-axis "Cumulative Reward" 0 --> 100
-    line [15, 45, 75, 95, 85, 70]
+    bar [15, 45, 75, 95, 85, 70]
 ```
 
 The system continuously tracks episodic performance and automatically saves the checkpoint that achieved the **highest historical reward** as `best_agent.pt`. This acts as a regularization mechanism, extracting the most generalized model before performance degrades.
