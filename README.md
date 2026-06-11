@@ -66,9 +66,9 @@ To formalize the locomotion task, we map the robot's physical variables to RL st
 
 | Space | Dimension / Components | Description |
 | :--- | :--- | :--- |
-| **State Space ($s_t$)** | **Proprioceptive observations** | Projected gravity vector (body tilt), joint positions & velocities (12 DoF), and linear/angular velocity commands ($v_x, v_y, \omega_z$). |
-| **Action Space ($a_t$)** | **12 Dimensions** | Target joint positions for the 12 actuators, processed via Proportional-Derivative (PD) controllers to apply motor torques. |
-| **Reward Function ($r_t$)** | **Multi-objective sum** | Reward for velocity tracking ($r_{vel}$), base stability ($r_{stable}$), and penalties for falling ($p_{fall}$) and high energy torque changes ($p_{torque}$). |
+| <nobr>**State Space ($s_t$)**</nobr> | **Proprioceptive observations** | Projected gravity vector (body tilt), joint positions & velocities (12 DoF), and linear/angular velocity commands ($v_x, v_y, \omega_z$). |
+| <nobr>**Action Space ($a_t$)**</nobr> | **12 Dimensions** | Target joint positions for the 12 actuators, processed via Proportional-Derivative (PD) controllers to apply motor torques. |
+| <nobr>**Reward Function ($r_t$)**</nobr> | **Multi-objective sum** | Reward for velocity tracking ($r_{vel}$), base stability ($r_{stable}$), and penalties for falling ($p_{fall}$) and high energy torque changes ($p_{torque}$). |
 
 ---
 
@@ -78,33 +78,28 @@ To approximate the control function, we design a Multi-Layer Perceptron (MLP) th
 
 ```mermaid
 graph LR
-    %% Colors and Styles
-    classDef inputLayer fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef hiddenLayer fill:#fff3e0,stroke:#ef6c00,stroke-width:2px;
-    classDef outputLayer fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef tensor fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1px,stroke-dasharray: 5 5;
+    %% Styles
+    classDef state fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
+    classDef layer fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef output fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
 
     %% Nodes
-    I_State["Input Tensor<br>(Observation State)"]:::tensor
+    State["State Input s_t<br>(Gravity, Joint Pos/Vel, Command)"]:::state
     
     subgraph MLP [Deep Feedforward Policy Network]
         direction LR
-        L1["Input Layer<br>Dim: [N]"]:::inputLayer
-        H1["Hidden Layer 1<br>Dim: [512]<br>Activation: ELU"]:::hiddenLayer
-        H2["Hidden Layer 2<br>Dim: [256]<br>Activation: ELU"]:::hiddenLayer
-        H3["Hidden Layer 3<br>Dim: [128]<br>Activation: ELU"]:::hiddenLayer
-        O1["Output Layer<br>Dim: [12]"]:::outputLayer
+        H1["Hidden Layer 1<br>(512 ELU)"]:::layer
+        H2["Hidden Layer 2<br>(256 ELU)"]:::layer
+        H3["Hidden Layer 3<br>(128 ELU)"]:::layer
     end
 
-    O_Action["Output Tensor<br>(Joint Torques)"]:::tensor
+    Action["Action Output a_t<br>(12 Joint Angles)"]:::output
 
-    %% Connections
-    I_State -->|e.g., Gravity, Joint Vel,<br>Command Vel| L1
-    L1 --> H1
+    %% Flow
+    State --> H1
     H1 --> H2
     H2 --> H3
-    H3 --> O1
-    O1 -->|Mapped to 12 Motors| O_Action
+    H3 --> Action
 ```
 
 * **Hidden Layers:** Three dense layers with **ELU (Exponential Linear Unit)** activations are utilized to handle negative inputs and avoid the vanishing gradient problem, allowing the network to capture complex, non-linear relationships.
@@ -119,27 +114,23 @@ Training the policy network starting from a random initialization is a severely 
 * **Massively Parallel Rollouts:** We leverage GPU-accelerated simulation to spawn **4,096 parallel agents** in Isaac Sim. This generates extremely large and diverse mini-batches of experiences, significantly reducing gradient variance and accelerating backpropagation convergence.
 
 ```mermaid
-flowchart TD
-    %% Styling
-    classDef env fill:#e8f4f8,stroke:#0277bd,stroke-width:2px,color:#000;
-    classDef opt fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#000;
-    classDef loss fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#000;
-    classDef weight fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000;
+flowchart LR
+    %% Styles
+    classDef sim fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+    classDef train fill:#f1f8e9,stroke:#558b2f,stroke-width:2px;
+    classDef weights fill:#fff3e0,stroke:#ef6c00,stroke-width:2px;
 
-    subgraph Isaac_Sim [NVIDIA Isaac Sim]
-        Agents[Parallel Agents 1 to 4,096*]:::env
-    end
+    %% Nodes
+    Sim["1. Isaac Sim Environment<br>(4,096 Parallel Robots)"]:::sim
+    Batch["2. Experience Batch<br>(States, Actions, Rewards)"]:::sim
+    PPO["3. PPO Loss & Adam<br>(Backpropagation & Gradient Descent)"]:::train
+    Weights["4. Policy Weights<br>(best_agent.pt / MLP Weights)"]:::weights
 
-    Batch[Massive Mini-Batch<br>State, Action, Reward]:::env
-    Loss[PPO Surrogate Loss<br>Reward Maximization]:::loss
-    Adam[Adam Optimizer<br>Gradient Descent]:::opt
-    Weights[(MLP Weights)]:::weight
-
-    Isaac_Sim -->|Collect Rollouts| Batch
-    Batch --> Loss
-    Loss -->|Backpropagation| Adam
-    Adam -->|Update| Weights
-    Weights -.->|Deploy Updated Policy| Isaac_Sim
+    %% Flow
+    Sim -->|Rollout Collection| Batch
+    Batch -->|Update gradients| PPO
+    PPO -->|Update weights| Weights
+    Weights -.->|Deploy updated policy| Sim
 ```
 
 ---
@@ -190,11 +181,10 @@ Deep RL is highly prone to instability; policies may overfit to recent explorati
 
 ```mermaid
 xychart-beta
-    title "Optimization & Early Stopping (Chapter 7 & 8)"
+    title "Locomotion Policy Training Curve (PPO)"
     x-axis "Training Iterations" [0, 1000, 2000, 3000, 4000, 5000]
-    y-axis "Cumulative Reward" 0 --> 100
-    bar [10, 40, 75, 95, 80, 65]
-    line [10, 40, 75, 95, 80, 65]
+    y-axis "Episode Reward" 0 --> 100
+    line [15, 45, 75, 95, 85, 70]
 ```
 
 The system continuously tracks episodic performance and automatically saves the checkpoint that achieved the **highest historical reward** as `best_agent.pt`. This acts as a regularization mechanism, extracting the most generalized model before performance degrades.
