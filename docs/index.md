@@ -185,23 +185,11 @@ We map the core deep learning concepts directly to our PyTorch implementation:
 Deep RL is highly prone to instability; policies may overfit to recent exploration paths and "forget" how to walk (catastrophic forgetting). This section directly connects **Chapter 8 (Optimization)**—the iterative process of descending the loss landscape to maximize reward—with **Chapter 7 (Regularization)**—preserving the best model before optimization degrades.
 
 ```mermaid
-graph TD
-    %% Nodes representing training steps and reward values
-    I0["Iteration 0<br>(Reward: 15)"]:::init --> I1["Iteration 1000<br>(Reward: 45)"]:::learning
-    I1 --> I2["Iteration 2000<br>(Reward: 75)"]:::learning
-    I2 --> I3["Iteration 3000<br>(Reward: 95)<br>⭐ Peak Performance"]:::peak
-    I3 -->|Over-exploration / Catastrophic Forgetting| I4["Iteration 4000<br>(Reward: 85)"]:::decay
-    I4 --> I5["Iteration 5000<br>(Reward: 70)"]:::decay
-
-    %% Early stopping saving best agent
-    I3 -.->|Regularization via Early Stopping| ES["best_agent.pt<br>(Optimal Policy Saved)"]:::saved
-
-    %% Styling
-    classDef init fill:#f5f5f5,stroke:#9e9e9e,stroke-width:2px;
-    classDef learning fill:#e3f2fd,stroke:#2196f3,stroke-width:2px;
-    classDef peak fill:#fff9c4,stroke:#fbc02d,stroke-width:3px;
-    classDef decay fill:#ffebee,stroke:#ef5350,stroke-width:2px;
-    classDef saved fill:#e8f5e9,stroke:#4caf50,stroke-width:3px;
+xychart-beta
+    title "Optimization & Early Stopping (Chapter 7 & 8)"
+    x-axis "Training Iterations" [0, 1000, 2000, 3000, 4000, 5000]
+    y-axis "Cumulative Reward" 0 --> 100
+    line [15, 45, 75, 95, 85, 70]
 ```
 
 The system continuously tracks episodic performance and automatically saves the checkpoint that achieved the **highest historical reward** as `best_agent.pt`. This acts as a regularization mechanism, extracting the most generalized model before performance degrades.
