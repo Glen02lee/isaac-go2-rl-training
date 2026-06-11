@@ -64,32 +64,11 @@ We formulate the locomotion problem as a Reinforcement Learning task under a Mar
 
 To formalize the locomotion task, we map the robot's physical variables to RL state and action spaces:
 
-<table>
-  <thead>
-    <tr>
-      <th width="180" align="left">Space</th>
-      <th width="220" align="left">Dimension / Components</th>
-      <th align="left">Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><b>State Space ($s_t$)</b></td>
-      <td><b>Proprioceptive observations</b></td>
-      <td>Projected gravity vector (body tilt), joint positions & velocities (12 DoF), and linear/angular velocity commands ($v_x, v_y, \omega_z$).</td>
-    </tr>
-    <tr>
-      <td><b>Action Space ($a_t$)</b></td>
-      <td><b>12 Dimensions</b></td>
-      <td>Target joint positions for the 12 actuators, processed via Proportional-Derivative (PD) controllers to apply motor torques.</td>
-    </tr>
-    <tr>
-      <td><b>Reward Function ($r_t$)</b></td>
-      <td><b>Multi-objective sum</b></td>
-      <td>Reward for velocity tracking ($r_{vel}$), base stability ($r_{stable}$), and penalties for falling ($p_{fall}$) and high energy torque changes ($p_{torque}$).</td>
-    </tr>
-  </tbody>
-</table>
+| Space &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Dimension / Components &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description |
+| :--- | :--- | :--- |
+| **State Space ($s_t$)** | **Proprioceptive observations** | Projected gravity vector (body tilt), joint positions & velocities (12 DoF), and linear/angular velocity commands ($v_x, v_y, \omega_z$). |
+| **Action Space ($a_t$)** | **12 Dimensions** | Target joint positions for the 12 actuators, processed via Proportional-Derivative (PD) controllers to apply motor torques. |
+| **Reward Function ($r_t$)** | **Multi-objective sum** | Reward for velocity tracking ($r_{vel}$), base stability ($r_{stable}$), and penalties for falling ($p_{fall}$) and high energy torque changes ($p_{torque}$). |
 
 ---
 
