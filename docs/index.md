@@ -6,7 +6,7 @@ title: "Deep RL Locomotion for Unitree Go2 (Isaac Sim)"
 # Deep RL Locomotion for Unitree Go2 (Isaac Sim)
 
 ![IsaacSim](https://img.shields.io/badge/IsaacSim-5.1.0-silver.svg)
-![IsaacLab](https://img.shields.io/badge/IsaacLab-4.1.0-green.svg)
+![IsaacLab](https://img.shields.io/badge/IsaacLab-2.3.0-green.svg)
 ![DeepLearning](https://img.shields.io/badge/Deep_Learning-PyTorch-red.svg)
 
 ---
@@ -145,7 +145,7 @@ flowchart LR
 ### A. Prerequisites (Mandatory)
 The simulation requires the following software ecosystem:
 * 🛠️ **NVIDIA Isaac Sim (5.1.0):** The core physics and photorealistic rendering engine.
-* 📦 **Isaac Lab (4.1.0):** The robot learning wrapper framework. Ensure `isaaclab.sh` is configured in your system path.
+* 📦 **Isaac Lab (2.3.0):** The robot learning wrapper framework. Ensure `isaaclab.sh` is configured in your system path.
 
 ---
 
