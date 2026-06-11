@@ -9,7 +9,7 @@
 ## 👥 Team Members
 - **Minseok Lee (이민석)** - 22100504 ([GitHub](https://github.com/Glen02lee))
 - **Sunghwan Shim (심성환)** - 22631005 ([GitHub](https://github.com/hwan129))
-- **Hyunmo Kang (강현모)** - 22100026 ([GitHub](https://github.com/hyunmo-kang))
+- **Hyunmo Kang (강현모)** - 22100026 ([GitHub](https://github.com/hmkang012))
 
 ---
 
