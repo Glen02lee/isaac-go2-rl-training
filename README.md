@@ -14,10 +14,10 @@
 ---
 
 ## 🎥 Project Presentation Video (YouTube)
-> [!IMPORTANT]
-> **[영상 업로드 후 여기에 YouTube 링크를 추가해 주세요! / Click here to watch the full 7-minute presentation on YouTube]**
->
-> *(예시: [![Project Video](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://youtu.be/YOUR_VIDEO_ID))*
+
+[![Project Video](https://img.youtube.com/vi/mHaLuUE3lUo/0.jpg)](https://youtu.be/mHaLuUE3lUo)
+
+*(Click the image above to watch the full 7-minute presentation on YouTube)*
 
 ---
 
