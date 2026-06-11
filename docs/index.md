@@ -229,6 +229,7 @@ Our next milestone is deploying `best_agent.pt` directly onto physical hardware.
 ## 6. References
 
 1. Goodfellow, I., Bengio, Y., & Courville, A. (2016). *Deep Learning*. MIT Press. (Chapter 6: Feedforward Networks, Chapter 7: Regularization, Chapter 8: Optimization).
-2. Schulman, J., Wolski, F., Dhariwal, P., Radford, A., & Klimov, O. (2017). Proximal policy optimization algorithms. *arXiv preprint arXiv:1707.06347*.
-3. Liang, J., Makoviychuk, V., Handa, A., Chentanez, N., Macklin, M., & Fox, D. (2018). GPU-accelerated robotic simulation for distributed reinforcement learning. *arXiv preprint arXiv:1810.05762*.
-4. SKRL: Synthesizing Reinforcement Learning (https://github.com/ToniRV/skrl).
+2. Schulman, J., Wolski, F., Dhariwal, P., Radford, A., & Klimov, O. (2017). Proximal policy optimization algorithms. *arXiv preprint arXiv:1707.06347*. [PPO Paper](https://arxiv.org/abs/1707.06347)
+3. Liang, J., Makoviychuk, V., Handa, A., Chentanez, N., Macklin, M., & Fox, D. (2018). GPU-accelerated robotic simulation for distributed reinforcement learning. *arXiv preprint arXiv:1810.05762*. [Isaac Gym Paper](https://arxiv.org/abs/1810.05762)
+4. CLeARoboticsLab. *go2_isaac_ros2*: Unitree Go2 Sim-to-Real controller repository. [GitHub Repository](https://github.com/CLeARoboticsLab/go2_isaac_ros2.git)
+5. abizovnuralem. *go2_omniverse*: Unitree Go2 robot in NVIDIA Isaac Omniverse environment. [GitHub Repository](https://github.com/abizovnuralem/go2_omniverse.git)
