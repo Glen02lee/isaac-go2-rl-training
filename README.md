@@ -4,62 +4,44 @@
 ![IsaacLab](https://img.shields.io/badge/IsaacLab-4.1.0-green.svg)
 ![DeepLearning](https://img.shields.io/badge/Deep_Learning-PyTorch-red.svg)
 
-This repository contains the **Deep Reinforcement Learning (RL) locomotion training logic** required to drive the Unitree Go2 quadruped robot in NVIDIA Isaac Sim. 
+---
 
-This project isolates the core Deep Learning algorithms responsible for teaching the robot how to walk, maintain balance, and respond to velocity commands, completely independent of external navigation stacks (like ROS 2 or SLAM).
+## 👥 Team Members
+- **Minseok Lee (이민석)** - 22100504 ([GitHub](https://github.com/Glen02lee))
+- **Sunghwan Shim (심성환)** - 22631005 ([GitHub](https://github.com/hwan129))
+- **Hyunmo Kang (강현모)** - 22100026 ([GitHub](https://github.com/hyunmo-kang))
 
 ---
 
-## 📸 Visual Demonstrations
-
-Here is a visual progression of our Sim-to-Real deep learning pipeline:
-
-<div align="center">
-  <table style="width:100%; text-align:center;">
-    <tr>
-      <td><b>1. Early Training Phase<br><i>(Focus: Chapter 8)</i></b></td>
-      <td><b>2. Massively Parallel RL<br><i>(Focus: Chapter 8)</i></b></td>
-    </tr>
-    <tr>
-      <td><img src="./docs/images/early_training.gif" width="350" alt="Early Training Phase"><br><i>The agent struggles to maintain balance and falls frequently.<br>Highlights non-convex optimization and sparse reward landscapes.</i></td>
-      <td><img src="./docs/images/parallel_training.png" width="350" alt="Parallel Training"><br><i>4,096 agents trained simultaneously.<br>Massive mini-batching ensures stable gradient descent.</i></td>
-    </tr>
-  </table>
-
-  <br><hr style="width:70%;"><br>
-
-  <h3>3-1. SLAM Integration</h3>
-  <img src="./docs/images/nav_slam.gif" width="600" alt="SLAM">
-  <p><i>The fully trained deep learning policy seamlessly integrates with ROS 2 RTAB-Map SLAM for spatial mapping.</i></p>
-
-  <br><hr style="width:70%;"><br>
-
-  <h3>3-2. Final Result: Autonomous Navigation</h3>
-  <img src="./docs/images/주행테스트 성공.webm.gif" width="600" alt="Autonomous Navigation (Nav2)">
-  <p><i>Successful autonomous driving and obstacle avoidance utilizing the ROS 2 Nav2 stack.<br>The deep learning policy handles foundational locomotion while Nav2 directs higher-level path planning.</i></p>
-</div>
+## 🎥 Project Presentation Video (YouTube)
+> [!IMPORTANT]
+> **[영상 업로드 후 여기에 YouTube 링크를 추가해 주세요! / Click here to watch the full 7-minute presentation on YouTube]**
+>
+> *(예시: [![Project Video](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://youtu.be/YOUR_VIDEO_ID))*
 
 ---
 
-## ⚠️ Prerequisites (Mandatory)
+## 1. Introduction
 
-The scripts in this repository are **not standalone Python files**. They are designed to be executed inside the highly optimized Omniverse Python environment. Therefore, you **MUST** have the following software installed and configured on your system before running anything:
+Quadrupedal robot locomotion is a highly complex, non-linear control problem. Traditional robotics approaches rely on complex kinematic/dynamic modeling and real-time path planning (such as Model Predictive Control), which often struggle in unpredictable, unstructured terrains. 
 
-1. **NVIDIA Isaac Sim (5.1.0):** The core physics and rendering engine.
-2. **Isaac Lab (4.1.0):** The RL wrapper framework. You must have the `isaaclab.sh` executable available in your system path or symlinked to the root of this repository.
+To address these limitations, this project applies **Deep Reinforcement Learning (DRL)** to develop a robust, end-to-end locomotion controller for the **Unitree Go2** quadruped robot. Operating entirely within **NVIDIA Isaac Sim** (leveraging the **Isaac Lab** framework), we train a neural network policy to map proprioceptive sensory inputs directly to joint level motor actions. 
 
-*If you do not have Isaac Sim and Isaac Lab installed, these training scripts will not function.*
+By isolating the core deep learning algorithms responsible for walking and balancing from external navigation stacks (such as ROS 2 or SLAM), we demonstrate how modern deep learning optimization principles can teach a robot to adapt, walk, and maintain balance under dynamic velocity commands.
 
 ---
 
-## 🧠 Deep Learning Foundations in Robotic Locomotion
+## 2. Task and Method
 
-While autonomous navigation (e.g., SLAM, path planning) determines *where* the robot should go, this project focuses on the foundational control problem: **how does the robot physically move its joints to walk without falling?** 
+We formulate the locomotion problem as a Reinforcement Learning task under a Markov Decision Process (MDP). The agent interacts with the Isaac Sim physics environment to learn an optimal policy $\pi_\theta(a|s)$ parameterized by the weights $\theta$ of a deep neural network.
 
-This is a highly complex, non-linear control problem that we solve entirely using Deep Learning principles, specifically drawing from **Chapter 6 (Deep Feedforward Networks)**, **Chapter 7 (Regularization)**, and **Chapter 8 (Optimization for Training Deep Models)** of standard deep learning curriculum.
+### A. State and Action Space
+* **State Space ($s_t$):** High-dimensional proprioceptive observations including the gravity vector (body orientation), joint positions and velocities of all 12 motors, and the user's velocity commands (linear and angular).
+* **Action Space ($a_t$):** 12-dimensional continuous joint target angles, which are subsequently mapped to motor torques via Proportional-Derivative (PD) controllers.
+* **Reward Function ($r_t$):** A multi-objective reward function that balances velocity tracking accuracy, base stability (keeping the body flat), and energy conservation (penalizing high joint torque changes and falls).
 
-### 1. Network Architecture (Chapter 6: Deep Feedforward Networks)
-To control a 12-DoF (Degrees of Freedom) quadruped, traditional robotics requires complex kinematic equations. Instead, we approximate this control function using a **Multi-Layer Perceptron (MLP)**.
+### B. Network Architecture (Chapter 6: Deep Feedforward Networks)
+To approximate the control function, we design a Multi-Layer Perceptron (MLP) that processes state inputs and outputs motor commands in real-time.
 
 ```mermaid
 graph LR
@@ -92,15 +74,13 @@ graph LR
     O1 -->|Mapped to 12 Motors| O_Action
 ```
 
-* **Input Layer (State Tensor):** The network continuously receives a high-dimensional observation vector. This is not camera data, but purely proprioceptive sensory inputs representing the robot's physical state:
-  * **Gravity Vector:** To understand body orientation and tilt.
-  * **Joint States:** The current position and velocity of all 12 motors.
-  * **Velocity Command:** The user's desired linear/angular velocity vector (e.g., move forward at 1.0 m/s).
-* **Hidden Layers (Feature Extraction):** Multiple dense layers equipped with non-linear activation functions (ELU) extract complex, spatial-temporal features from the raw sensory data. These layers build internal representations of "balance" and "momentum."
-* **Output Layer (Action Tensor):** The network outputs a 12-dimensional vector. This output is directly mapped to target joint positions or torques applied to the physical motors at the next time step.
+* **Hidden Layers:** Three dense layers with **ELU (Exponential Linear Unit)** activations are utilized to handle negative inputs and avoid the vanishing gradient problem, allowing the network to capture complex, non-linear relationships.
 
-### 2. Training Strategy (Chapter 8: Optimization for Deep Models)
-Training a neural network from a random initialization to walk is a severely non-convex optimization problem with an incredibly sparse reward landscape (the robot mostly falls in the beginning). We utilize advanced optimization techniques to find a robust local minimum.
+### C. Optimization Strategy (Chapter 8: Optimization for Deep Models)
+Training the policy network starting from a random initialization is a severely non-convex optimization problem with a sparse reward landscape. To achieve convergence and stability, we utilize:
+* **Proximal Policy Optimization (PPO) Loss:** A surrogate objective function that clips probability updates, ensuring the policy does not deviate too far from the previous iteration, preventing catastrophic performance drops.
+* **Adam Optimizer:** An adaptive learning rate optimization algorithm that computes individual learning rates for each weight based on running estimates of the first and second moments of the gradients.
+* **Massively Parallel Rollouts:** We leverage GPU-accelerated simulation to spawn **4,096 parallel agents** in Isaac Sim. This generates extremely large and diverse mini-batches of experiences, significantly reducing gradient variance and accelerating backpropagation convergence.
 
 ```mermaid
 flowchart TD
@@ -126,27 +106,39 @@ flowchart TD
     Weights -.->|Deploy Updated Policy| Isaac_Sim
 ```
 
-* **Surrogate Objective Function (PPO Loss):** Instead of a simple Mean Squared Error, the network optimizes a Proximal Policy Optimization (PPO) loss function. It aims to maximize a cumulative **Reward Signal** (e.g., moving at the target velocity, keeping the base stable) while penalizing undesirable behaviors (e.g., excessive energy usage, falling over).
-* **Adam Optimizer:** We use the Adam optimization algorithm, which adapts the learning rate for each network weight individually based on the first and second moments of the gradients. This is critical for navigating the complex loss landscape of locomotion.
-* **Massive Mini-Batching for Gradient Stability:** To compute accurate gradients via Backpropagation, we must overcome the high variance of RL exploration. We achieve this by simulating **4,096 parallel environments** simultaneously in Isaac Sim. This generates massive, diverse mini-batches of state-action-reward data per iteration, drastically stabilizing the gradient updates and accelerating convergence. *(Note: 4,096 is a default configurable hyperparameter, which can be scaled up or down based on available GPU VRAM).*
-
 ---
 
-## ⚙️ How to Train the Model
+## 3. Experiments & Implementation
 
-### Step 1: Start the Optimization Process
-To begin training the network weights, run:
+### A. Prerequisites (Mandatory)
+The training scripts run inside the Omniverse Python environment.
+1. **NVIDIA Isaac Sim (5.1.0):** The physics and rendering simulator.
+2. **Isaac Lab (4.1.0):** The RL wrapper framework. `isaaclab.sh` must be configured in your path.
 
+### B. Training the Model
+To initiate backpropagation and optimize network weights, run:
 ```bash
 ./train_go2.sh
 ```
-* **Under the hood:** This script launches Isaac Sim in Headless Mode (saving GPU VRAM for PyTorch tensor operations) and spawns 4,096 robots. The SKRL library orchestrates the PPO loop, performing forward passes to collect data, calculating the loss, and executing backpropagation via the Adam optimizer to iteratively update the MLP weights.
+* **Mechanism:** The script starts Isaac Sim in headless mode. The **SKRL** library coordinates the training loop, feeding state inputs to the MLP, computing the PPO loss, and updating weights using the Adam optimizer.
 
-### Step 2: Monitor Optimization (Tensorboard)
-Monitor the training logs. The key metric is the **Reward**. As the optimizer successfully descends the loss landscape, the cumulative reward will climb, indicating the MLP is learning structural representations of walking.
+### C. Inference (Testing)
+To test the generalized capabilities of the network:
+```bash
+./play.sh
+```
+* **Mechanism:** The model weights are frozen using `torch.inference_mode()`. Feedforward passes map sensory inputs directly to motor targets at 50 Hz.
 
-### Step 3: Checkpointing and The Optimal Policy (`best_agent.pt` / Chapter 7)
-Deep RL training is an iterative process that typically runs for thousands of iterations (e.g., 5,000 to 10,000). 
+### D. Codebase Mapping
+* **[train.py](file:///C:/Users/USER/Desktop/캡스톤/go2/isaac-go2-rl-training/scripts/reinforcement_learning/skrl/train.py):** Sets up PPO hyperparameters, initializes the MLP, and runs the gradient descent loop.
+* **[play.py](file:///C:/Users/USER/Desktop/캡스톤/go2/isaac-go2-rl-training/scripts/reinforcement_learning/skrl/play.py):** Implements real-time feedforward inference using `best_agent.pt`.
+
+---
+
+## 4. Results & Analysis
+
+### A. Optimization and Regularization (Chapter 7: Regularization)
+Deep RL is highly prone to instability; policies may overfit to recent exploration paths and "forget" how to walk (catastrophic forgetting). To prevent this, we apply **Early Stopping** (a core concept in Chapter 7).
 
 ```mermaid
 xychart-beta
@@ -156,56 +148,57 @@ xychart-beta
     bar [10, 40, 75, 95, 80, 65]
     line [10, 40, 75, 95, 80, 65]
 ```
-*(Conceptual graph: At iteration 3,000, the reward peaks. By iteration 4,000, the agent over-explores and performance degrades. The system saves the weights from iteration 3,000 as `best_agent.pt`.)*
 
-* **Periodic Checkpoints:** As the optimization progresses, the system saves the network's weights at regular intervals (e.g., `agent_1000.pt`, `agent_2000.pt`). These serve as historical snapshots of the learning process.
-* **Regularization via Early Stopping (Chapter 7):** RL training is highly prone to instability—a model might walk perfectly at iteration 3,000 but "forget" how to walk by iteration 4,000 due to over-exploration or bad gradient updates (a form of overfitting to recent batches). To solve this, we apply a concept from **Chapter 7 (Regularization for Deep Learning)**: **Early Stopping**. The SKRL library continuously evaluates the agent and tracks the average episodic reward. The specific set of weights that achieved the **highest historical reward** is automatically isolated and saved as `best_agent.pt`. This acts as a regularization technique, ensuring we always extract the absolute optimal, most generalized policy, regardless of any future training degradation.
+The system continuously tracks episodic performance and automatically saves the checkpoint that achieved the **highest historical reward** as `best_agent.pt`. This acts as a regularization mechanism, extracting the most generalized model before performance degrades.
 
----
+### B. Visual Demonstrations
 
-## 🏃 How to Test the Trained Model (Inference)
+<div align="center">
+  <table style="width:100%; text-align:center;">
+    <tr>
+      <td><b>1. Early Training Phase<br><i>(Struggles to balance)</i></b></td>
+      <td><b>2. Massively Parallel RL<br><i>(Gradient Stability)</i></b></td>
+    </tr>
+    <tr>
+      <td><img src="./docs/images/early_training.gif" width="350" alt="Early Training Phase"><br><i>The agent struggles to maintain balance.</i></td>
+      <td><img src="./docs/images/parallel_training.png" width="350" alt="Parallel Training"><br><i>4,096 agents trained simultaneously.</i></td>
+    </tr>
+  </table>
 
-To evaluate the trained network in a live physics simulation:
+  <br><hr style="width:70%;"><br>
 
-### 1. Update the Play Script
-Point the `+checkpoint=` argument in `play.sh` to your newly trained weight file.
-
-### 2. Run the Feedforward Pass
-```bash
-./play.sh
-```
-* **Under the hood:** The script loads the `.pt` file and sets `torch.inference_mode()`, freezing the network weights. As the simulation runs, the script continuously performs **Feedforward passes** through the MLP, transforming the current state tensor into instantaneous motor torque commands in real-time.
-
----
-
-## 📂 Deep Learning Codebase Structure
-
-The mapping of Deep Learning concepts to our PyTorch codebase:
-
-* **`scripts/reinforcement_learning/skrl/train.py` (The Optimizer)**
-  - Implements the optimization logic (Chapter 8).
-  - Initializes the neural network, defines the PPO loss function, and configures the Adam optimizer.
-  - Manages the collection of the massive 4,096-agent batch data required for stable backpropagation.
-
-* **`scripts/reinforcement_learning/skrl/play.py` (The Feedforward Inference)**
-  - Implements the execution phase (Chapter 6).
-  - Handles the real-time mapping of Isaac Sim sensor data into the Input Tensor, passes it through the MLP, and applies the Output Tensor back to the physics engine.
+  <h3>3. SLAM Integration & Autonomous Navigation</h3>
+  <table style="width:100%; text-align:center;">
+    <tr>
+      <td><b>3-1. ROS 2 RTAB-Map SLAM</b></td>
+      <td><b>3-2. Autonomous Navigation (Nav2)</b></td>
+    </tr>
+    <tr>
+      <td><img src="./docs/images/nav_slam.gif" width="350" alt="SLAM"><br><i>Mapping the environment in real-time.</i></td>
+      <td><img src="./docs/images/주행테스트 성공.webm.gif" width="350" alt="Navigation"><br><i>Path planning combined with Deep RL locomotion.</i></td>
+    </tr>
+  </table>
+</div>
 
 ---
 
-## 🚀 What's Next? (Sim-to-Real)
+## 5. Conclusion & Future Work
 
-While our current model successfully navigates the simulated environment, the ultimate goal of Deep RL in robotics is **Sim-to-Real transfer**. 
+By utilizing a three-layer deep feedforward network trained via Proximal Policy Optimization (PPO), we successfully enabled the Unitree Go2 robot to learn stable locomotion behaviors. Deploying massive parallel rollouts in Isaac Sim minimized gradient variance, enabling quick optimization of a non-convex loss function. 
 
 <div align="center">
   <img src="./docs/images/shaking%20hands.gif" width="400" alt="Real Go2 Waving"><br>
-  <i>The real Unitree Go2 robot performing a physical action. The next phase involves deploying our trained MLP brain directly into this physical hardware.</i>
+  <i>The real Unitree Go2 robot performing a physical action.</i>
 </div>
 
-Future iterations will focus on minimizing the "reality gap" by introducing Domain Randomization (varying mass, friction, and motor latency during training) so the `best_agent.pt` can seamlessly control the physical Unitree Go2 robot in the real world!
+**Future Work (Sim-to-Real):**
+Our next milestone is deploying `best_agent.pt` directly onto physical hardware. To address the "reality gap" (differences in friction, motor latencies, and mass distributions), we will implement **Domain Randomization** during training, adding Gaussian noise to physical properties to ensure the learned weights are highly robust in the real world.
 
 ---
 
-## 👥 Team Members
-- **[Minseok Lee (이민석)](https://github.com/Glen02lee)** - 22100504
-- **[Sunghwan Shim (심성환)](https://github.com/hwan129)** - 22631005
+## 6. References
+
+1. Goodfellow, I., Bengio, Y., & Courville, A. (2016). *Deep Learning*. MIT Press. (Chapter 6: Feedforward Networks, Chapter 7: Regularization, Chapter 8: Optimization).
+2. Schulman, J., Wolski, F., Dhariwal, P., Radford, A., & Klimov, O. (2017). Proximal policy optimization algorithms. *arXiv preprint arXiv:1707.06347*.
+3. Liang, J., Makoviychuk, V., Handa, A., Chentanez, N., Macklin, M., & Fox, D. (2018). GPU-accelerated robotic simulation for distributed reinforcement learning. *arXiv preprint arXiv:1810.05762*.
+4. SKRL: Synthesizing Reinforcement Learning (https://github.com/ToniRV/skrl).
