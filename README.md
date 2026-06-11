@@ -48,11 +48,11 @@
 
 ## 1. Introduction
 
-Quadrupedal robot locomotion is a highly complex, non-linear control problem. Traditional robotics approaches rely on complex kinematic/dynamic modeling and real-time path planning (such as Model Predictive Control), which often struggle in unpredictable, unstructured terrains. 
+Controlling a quadrupedal robot involves coordinating a high-dimensional joint space (12 Degrees of Freedom) based on continuous multi-sensor feedback (IMUs, joint encoders, and contact sensors). Using traditional model-based control methods to mathematically model and integrate all these sensor dynamics is extremely complex and time-consuming, especially when dealing with unpredictable or rough terrains.
 
-To address these limitations, this project applies **Deep Reinforcement Learning (DRL)** to develop a robust, end-to-end locomotion controller for the **Unitree Go2** quadruped robot. Operating entirely within **NVIDIA Isaac Sim** (leveraging the **Isaac Lab** framework), we train a neural network policy to map proprioceptive sensory inputs directly to joint level motor actions. 
+Furthermore, quadrupedal robots are highly sophisticated, expensive hardware. Directly testing unverified control algorithms or raw policies on physical robots in the real world is incredibly risky. Falls, collisions, and motor overloads can easily result in catastrophic hardware damage, significant financial loss, and safety hazards. 
 
-By isolating the core deep learning algorithms responsible for walking and balancing from external navigation stacks (such as ROS 2 or SLAM), we demonstrate how modern deep learning optimization principles can teach a robot to adapt, walk, and maintain balance under dynamic velocity commands.
+To resolve these challenges, this project applies **Deep Reinforcement Learning (DRL)** in a high-fidelity physics simulator (**NVIDIA Isaac Sim** using the **Isaac Lab** framework). This approach allows the robot to learn optimal locomotion "reflexes" through massive, safe trial-and-error simulation, completely eliminating any risk to physical hardware. By training a deep neural network policy to map sensory feedback directly to motor commands, we establish a safe, stable, and cost-effective pipeline that bridges the gap between simulation and real-world deployment (Sim-to-Real).
 
 ---
 
