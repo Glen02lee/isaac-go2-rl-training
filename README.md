@@ -21,7 +21,8 @@
   </a>
   <br><br>
   <p><i>Click the image above or use the link below to watch the full 7-minute presentation on YouTube:</i></p>
-  <p><b>🔗 Link: <a href="https://youtu.be/mHaLuUE3lUo">https://youtu.be/mHaLuUE3lUo</a></b></p>
+  <p><b>🔗 Video Link: <a href="https://youtu.be/mHaLuUE3lUo">https://youtu.be/mHaLuUE3lUo</a></b></p>
+  <p><b>📄 Presentation Slides: <a href="./docs/Isaac%20Go2%20RL%20Training.pdf">Isaac Go2 RL Training.pdf</a></b> / <b><a href="file:///C:/Users/USER/Desktop/캡스톤/go2/isaac-go2-rl-training/docs/Isaac%20Go2%20RL%20Training.pdf">Local Path</a></b></p>
 </div>
 
 ---
