@@ -39,7 +39,7 @@
    - [C. Inference (Testing)](#c-inference-testing)
    - [D. Codebase Mapping](#d-codebase-mapping)
 4. [Results & Analysis](#4-results--analysis)
-   - [A. Optimization and Regularization (Chapter 7)](#a-optimization-and-regularization-chapter-7-regularization)
+   - [A. Optimization and Regularization (Chapters 7 and 8)](#a-optimization-and-regularization-chapters-7-and-8)
    - [B. Visual Demonstrations](#b-visual-demonstrations)
 5. [Conclusion & Future Work](#5-conclusion--future-work)
 6. [References](#6-references)
@@ -175,7 +175,7 @@ We map the core deep learning concepts directly to our PyTorch implementation:
 
 ## 4. Results & Analysis
 
-### A. Optimization and Regularization (Chapter 7 & 8)
+### A. Optimization and Regularization (Chapters 7 and 8)
 
 Deep RL is highly prone to instability; policies may overfit to recent exploration paths and "forget" how to walk (catastrophic forgetting). This section directly connects **Chapter 8 (Optimization)**—the iterative process of descending the loss landscape to maximize reward—with **Chapter 7 (Regularization)**—preserving the best model before optimization degrades.
 
