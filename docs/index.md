@@ -71,9 +71,9 @@ To formalize the locomotion task, we map the robot's physical variables to RL st
 
 | Space | Dimension / Components | Description |
 | :--- | :--- | :--- |
-| <nobr>**State Space ($s_t$)**</nobr> | **Proprioceptive observations** | Projected gravity vector (body tilt), joint positions & velocities (12 DoF), and linear/angular velocity commands ($v_x, v_y, \omega_z$). |
-| <nobr>**Action Space ($a_t$)**</nobr> | **12 Dimensions** | Target joint positions for the 12 actuators, processed via Proportional-Derivative (PD) controllers to apply motor torques. |
-| <nobr>**Reward Function ($r_t$)**</nobr> | **Multi-objective sum** | Reward for velocity tracking ($r_{vel}$), base stability ($r_{stable}$), and penalties for falling ($p_{fall}$) and high energy torque changes ($p_{torque}$). |
+| <nobr><small>**State Space ($s_t$)**</small></nobr> | **Proprioceptive observations** | Projected gravity vector (body tilt), joint positions & velocities (12 DoF), and linear/angular velocity commands ($v_x, v_y, \omega_z$). |
+| <nobr><small>**Action Space ($a_t$)**</small></nobr> | **12 Dimensions** | Target joint positions for the 12 actuators, processed via Proportional-Derivative (PD) controllers to apply motor torques. |
+| <nobr><small>**Reward Function ($r_t$)**</nobr> | **Multi-objective sum** | Reward for velocity tracking ($r_{vel}$), base stability ($r_{stable}$), and penalties for falling ($p_{fall}$) and high energy torque changes ($p_{torque}$). |
 
 ---
 
