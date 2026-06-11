@@ -26,6 +26,25 @@
 
 ---
 
+## 📌 Table of Contents
+1. [Introduction](#1-introduction)
+2. [Task and Method](#2-task-and-method)
+   - [A. State and Action Space](#a-state-and-action-space)
+   - [B. Network Architecture (Chapter 6)](#b-network-architecture-chapter-6-deep-feedforward-networks)
+   - [C. Optimization Strategy (Chapter 8)](#c-optimization-strategy-chapter-8-optimization-for-deep-models)
+3. [Experiments & Implementation](#3-experiments--implementation)
+   - [A. Prerequisites](#a-prerequisites-mandatory)
+   - [B. Training the Model](#b-training-the-model)
+   - [C. Inference (Testing)](#c-inference-testing)
+   - [D. Codebase Mapping](#d-codebase-mapping)
+4. [Results & Analysis](#4-results--analysis)
+   - [A. Optimization and Regularization (Chapter 7)](#a-optimization-and-regularization-chapter-7-regularization)
+   - [B. Visual Demonstrations](#b-visual-demonstrations)
+5. [Conclusion & Future Work](#5-conclusion--future-work)
+6. [References](#6-references)
+
+---
+
 ## 1. Introduction
 
 Quadrupedal robot locomotion is a highly complex, non-linear control problem. Traditional robotics approaches rely on complex kinematic/dynamic modeling and real-time path planning (such as Model Predictive Control), which often struggle in unpredictable, unstructured terrains. 
